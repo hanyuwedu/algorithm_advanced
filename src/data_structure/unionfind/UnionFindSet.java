@@ -1,12 +1,13 @@
 package data_structure.unionfind;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @param <E>
  *
  * @author  Hanyuw
- * @since   2.0
+ * @since   2.1
  * @date    12/31/2018
  */
 public class UnionFindSet<E>
@@ -119,6 +120,60 @@ public class UnionFindSet<E>
         }
 
         return this.neighborsSize.get(this.find(e));
+    }
+
+
+    /**
+     * Find all elements that are connected to given element
+     * in O(n) time
+     *
+     * @param e target element
+     * @return all elements that are connected to given element
+     */
+    public Set<E> getNeighbors(E e) {
+        if (!this.root.containsKey(e)) {
+            return new HashSet<>();
+        }
+
+
+//        return this.root.keySet().stream()
+//                .filter(n -> this.isUnioned(n, e))
+//                .collect(Collectors.toSet());
+        Set<E> neighbors = new HashSet<>();
+        for (E next : this.root.keySet()) {
+            if (this.isUnioned(e, next)) {
+                neighbors.add(next);
+            }
+        }
+
+        return neighbors;
+    }
+
+
+    /**
+     * Collect all elements in various set along their connectivity
+     * in O(n) time
+     *
+     * @return all elements along components
+     */
+    public Set<Set<E>> getElementsAlongComponent() {
+        Map<E, Set<E>> elementsAlongComponent = new HashMap<>();
+
+        for (E k : this.neighborsSize.keySet()) {
+            elementsAlongComponent.put(k, new HashSet<>());
+        }
+
+        for (E v : this.root.keySet()) {
+            elementsAlongComponent.get(this.find(v)).add(v);
+        }
+
+//        return elementsAlongComponent.values().stream().collect(Collectors.toSet());
+        Set<Set<E>> components = new HashSet<>();
+        for (Set<E> sets : elementsAlongComponent.values()) {
+            components.add(sets);
+        }
+
+        return components;
     }
 
 
