@@ -30,7 +30,6 @@ public class IntegerHashMaxHeap {
 
             this.siftUp(lastIndex);
         }
-
     }
 
     public Integer remove() {

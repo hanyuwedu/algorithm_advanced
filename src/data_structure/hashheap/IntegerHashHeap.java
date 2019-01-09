@@ -11,7 +11,7 @@ public class IntegerHashHeap {
     private Map<Integer, Integer> position;
     int size;
 
-    public IntegerHashMaxHeap() {
+    public IntegerHashHeap() {
         this.heap = new ArrayList<>();
         this.count = new HashMap<>();
         this.position = new HashMap<>();
@@ -30,7 +30,6 @@ public class IntegerHashHeap {
 
             this.siftUp(lastIndex);
         }
-
     }
 
     public Integer remove() {
