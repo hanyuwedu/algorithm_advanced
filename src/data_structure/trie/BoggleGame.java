@@ -3,7 +3,6 @@ package data_structure.trie;
 import util.Utilities;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -26,57 +25,51 @@ public class BoggleGame {
             trie.add(word);
         }
 
-        Stack<String> collects = new Stack<>();
         boolean[][] visited = new boolean[board.length][board[0].length];
         int[] dx = {1, -1, 0, 0}, dy = {0, 0, 1, -1};
         int[] max = {0};
+        int[] currentWords = {0};
 
 
-        collectWords(board, visited, trie, collects, max, 0, dx, dy);
+        collectWords(board, visited, trie, max, currentWords,0, dx, dy);
         return max[0];
     }
 
-    private void collectWords(char[][] board, boolean[][] visited, Trie trie, Stack<String> collects, int[] max, int pos, int[] dx, int[] dy) {
-        max[0] = Math.max(max[0], collects.size());
-
-        int i = pos / board[0].length, j = pos % board[0].length;
-
-        if (i >= board.length) {
+    private void collectWords(char[][] board, boolean[][] visited, Trie trie, int[] max, int[] currentWords, int pos, int[] dx, int[] dy) {
+        if (pos == board.length * board[0].length) {
+            max[0] = Math.max(max[0], currentWords[0]);
             return;
         }
+
+        /// Option 1: skip this character
+        collectWords(board, visited, trie, max, currentWords, pos + 1, dx, dy);
+
+        /// Option 2: use this character
+        int i = pos / board[0].length, j = pos % board[0].length;
 
         if (visited[i][j]) {
             return;
         }
 
-        List<String> availableWords = new ArrayList<>();
         List<List<Integer>> availableIndecies = new ArrayList<>();
-        Stack<Character> chars = new Stack<>();
         Stack<Integer> indecies = new Stack<>();
 
-        findAvailableWords(board, chars, indecies, availableWords, availableIndecies, visited, trie.root, i, j, dx, dy);
+        findAvailableWords(board, indecies, availableIndecies, visited, trie.root, i, j, dx, dy);
 
-        System.out.println(pos);
-        System.out.println(availableWords);
+        System.out.println("pos: " + pos + ", indecies: " + availableIndecies);
 
-        for (int n = 0; n <= availableWords.size() - 1; n++) {
-            selectWord(collects, availableWords.get(n), visited, availableIndecies.get(n));
+        for (int n = 0; n <= availableIndecies.size() - 1; n++) {
+            selectWord(availableIndecies.get(n), visited, currentWords);
 
-            for (int p = pos + 1; p <= board.length * board[0].length; p++) {
-                collectWords(board, visited, trie, collects, max, p, dx, dy);
-            }
+            collectWords(board, visited, trie, max, currentWords, pos + 1, dx, dy);
 
-            unselectWord(collects, visited, availableIndecies.get(n));
-        }
-
-        for (int p = pos + 1; p <= board.length * board[0].length; p++) {
-            collectWords(board, visited, trie, collects, max, p, dx, dy);
+            unselectWord(availableIndecies.get(n), visited, currentWords);
         }
     }
 
 
 
-    private void findAvailableWords(char[][] board, Stack<Character> chars, Stack<Integer> indecies, List<String> availableWords, List<List<Integer>> indexes, boolean[][] visited, TrieNode current, int i, int j, int[] dx, int[] dy) {
+    private void findAvailableWords(char[][] board, Stack<Integer> indecies, List<List<Integer>> indexes, boolean[][] visited, TrieNode current, int i, int j, int[] dx, int[] dy) {
         if (i < 0 || i >= board.length || j < 0 || j >= board[0].length) {
             return;
         }
@@ -91,73 +84,33 @@ public class BoggleGame {
 
         current = current.next[board[i][j] - 'a'];
         visited[i][j] = true;
-        chars.push(current.c);
         indecies.push(i * board[0].length + j);
-
         if (current.isWord) {
-            availableWords.add(stacktoString(chars));
             indexes.add(new ArrayList<>(indecies));
         }
 
         for (int d = 0; d <= 3; d++) {
             int x = i + dx[d], y = j + dy[d];
 
-            findAvailableWords(board, chars, indecies, availableWords, indexes, visited, current, x, y, dx, dy);
+            findAvailableWords(board, indecies, indexes, visited, current, x, y, dx, dy);
         }
 
         visited[i][j] = false;
-        chars.pop();
         indecies.pop();
-
-//        for (int d = 0; d <= 3; d++) {
-//            int x = i + dx[d], y = j + dy[d];
-//
-//            if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
-//                continue;
-//            }
-//
-//            if (visited[x][y]) {
-//                continue;
-//            }
-//
-//            if (current.next[board[i][j] - 'a'] == null) {
-//                continue;
-//            }
-//
-//            /// Select
-//            TrieNode next = current.next[board[i][j] - 'a'];
-//            visited[x][y] = true;
-//            chars.push(next.c);
-//            indecies.push(x * board[0].length + y);
-//
-//            /// Check result
-//            if (next.isWord) {
-//                availableWords.add(stacktoString(chars));
-//                indexes.add(new ArrayList<>(indecies));
-//            }
-//
-//            /// recursion
-//            findAvailableWords(board, chars, indecies, availableWords, indexes, visited, current, x, y, dx, dy);
-//
-//            /// Unselect
-//            visited[x][y] = false;
-//            chars.pop();
-//            indecies.pop();
-//        }
     }
 
-    private void selectWord(Stack<String> collects, String word, boolean[][] visited, List<Integer> index) {
-        collects.push(word);
+    private void selectWord(List<Integer> index, boolean[][] visited, int[] currentWords) {
         for (int i : index) {
             visited[i / visited[0].length][i % visited[0].length] = true;
         }
+        currentWords[0]++;
     }
 
-    private void unselectWord(Stack<String> collects, boolean[][] visited, List<Integer> index) {
-        collects.pop();
+    private void unselectWord(List<Integer> index, boolean[][] visited, int[] currentWords) {
         for (int i : index) {
             visited[i / visited[0].length][i % visited[0].length] = false;
         }
+        currentWords[0]--;
     }
 
     private String stacktoString(Stack<Character> stack) {
