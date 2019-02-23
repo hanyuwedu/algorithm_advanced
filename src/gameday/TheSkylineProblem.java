@@ -6,8 +6,9 @@ import java.util.*;
 
 public class TheSkylineProblem {
     /**
-     * 1/8/2019
-     * Standardized Sweep Line
+     * 2/23/2019
+     * GameDay
+     * https://www.lintcode.com/problem/the-skyline-problem/description
      *
      * @param buildings: A list of lists of integers
      * @return: Find the outline of those buildings
@@ -17,62 +18,81 @@ public class TheSkylineProblem {
             return new ArrayList<>();
         }
 
-        Set<Integer> line = new HashSet<>();
-        Map<Integer, List<Integer>> left = new HashMap<>(), right = new HashMap<>();
-
-        HashHeap<Integer> heights = new HashHeap<>((a, b) -> b - a);
-        List<List<Integer>> outlines = new ArrayList<>();
+        Map<Integer, List<Integer>> in = new HashMap<>(), out = new HashMap<>();
+        Set<Integer> set = new HashSet<>();
 
         for (int[] building : buildings) {
-            line.add(building[0]);
-            line.add(building[1]);
+            set.add(building[0]);
+            set.add(building[1]);
 
-            if (!left.containsKey(building[0])) {
-                left.put(building[0], new ArrayList<>());
+            if (!in.containsKey(building[0])) {
+                in.put(building[0], new ArrayList<>());
             }
-            left.get(building[0]).add(building[2]);
+            in.get(building[0]).add(building[2]);
 
-            if (!right.containsKey(building[1])) {
-                right.put(building[1], new ArrayList<>());
+            if (!out.containsKey(building[1])) {
+                out.put(building[1], new ArrayList<>());
             }
-            right.get(building[1]).add(building[2]);
+            out.get(building[1]).add(building[2]);
         }
 
-        Queue<Integer> heap = new PriorityQueue<>(line);
-        int max = 0, start = 0;
+        Queue<Integer> timeline = new PriorityQueue<>(set);
+        List<List<Integer>> outline = new ArrayList<>();
 
-        while (!heap.isEmpty()) {
-            int current = heap.remove();
+        int start = -1, height = 0;
+        TreeMap<Integer, Integer> currentHeights = new TreeMap<>((a, b) -> b - a);
 
-            if (heights.isEmpty()) {
-                start = current;
+        while(!timeline.isEmpty()) {
+            int next = timeline.remove();
+
+            if (in.containsKey(next)) {
+                for (int h : in.get(next)) {
+                    add(currentHeights, h);
+                }
             }
 
-            if (left.containsKey(current)) {
-                heights.addAll(left.get(current));
+
+            if (out.containsKey(next)) {
+                for (int h : out.get(next)) {
+                    remove(currentHeights, h);
+                }
             }
 
-            if (right.containsKey(current)) {
-                heights.removeAll(right.get(current));
-            }
+            int nextHeight = currentHeights.isEmpty() ? 0 : peek(currentHeights);
 
-            int next = heights.size() == 0 ? 0 : heights.peek();
-
-            if (next == max || max == 0) {
-                max = next;
-                continue;
+            if (height == 0) {
+                start = next;
+                height = nextHeight;
             } else {
-                List<Integer> building = new ArrayList<>();
-                building.add(start);
-                building.add(current);
-                building.add(max);
-                outlines.add(building);
+                if (nextHeight != height) {
+                    List<Integer> currentBuilding = new ArrayList<>();
+                    currentBuilding.add(start);
+                    currentBuilding.add(next);
+                    currentBuilding.add(height);
+                    outline.add(currentBuilding);
 
-                start = current;
-                max = next;
+                    start = next;
+                    height = nextHeight;
+                }
             }
+
         }
 
-        return outlines;
+        return outline;
+    }
+
+    private void remove(TreeMap<Integer, Integer> currentHeights, int height) {
+        currentHeights.put(height, currentHeights.get(height) - 1);
+        if (currentHeights.get(height) == 0) {
+            currentHeights.remove(height);
+        }
+    }
+
+    private void add(TreeMap<Integer, Integer> currentHeights, int height) {
+        currentHeights.put(height, currentHeights.getOrDefault(height, 0) + 1);
+    }
+
+    private int peek(TreeMap<Integer, Integer> currentHeights) {
+        return currentHeights.firstKey();
     }
 }

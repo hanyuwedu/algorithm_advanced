@@ -2,8 +2,9 @@ package gameday;
 
 public class KSum {
     /**
-     * 12/26
-     * Backpack DP
+     * 2/22/2019
+     * GameDay
+     * https://www.lintcode.com/problem/k-sum/description
      *
      * @param A: An integer array
      * @param k: A positive integer (k <= length(A))
@@ -11,29 +12,28 @@ public class KSum {
      * @return: An integer
      */
     public int kSum(int[] A, int k, int target) {
-        if (target <= 0 || k == 0 || target == 0) {
+        if (A == null || A.length == 0) {
             return 0;
         }
 
         int a = A.length;
-        int[][][] dp = new int[2][k + 1][target + 1];
+        int[][][] dp = new int[a + 1][k + 1][target + 1];
+
         dp[0][0][0] = 1;
-
         for (int i = 1; i <= a; i++) {
-            dp[i % 2][0][0] = 1;
+            dp[i][0][0] = 1;
             for (int j = 1; j <= k; j++) {
-                for (int t = 1; t <= target; t++) {
-
-                    if (A[i - 1] > t) {
-                        dp[i % 2][j][t] = dp[(i - 1) % 2][j][t];
+                for (int x = 1; x <= target; x++) {
+                    if (x - A[i - 1] < 0) {
+                        dp[i][j][x] = dp[i - 1][j][x];
                         continue;
                     }
 
-                    dp[i % 2][j][t] = dp[(i - 1) % 2][j - 1][t - A[i - 1]] + dp[(i - 1) % 2][j][t];
+                    dp[i][j][x] = dp[i - 1][j - 1][x - A[i - 1]] + dp[i - 1][j][x];
                 }
             }
         }
 
-        return dp[a % 2][k][target];
+        return dp[a][k][target];
     }
 }

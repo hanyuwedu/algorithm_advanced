@@ -1,16 +1,14 @@
 package gameday;
 
-import data_structure.trie.Trie;
-import data_structure.trie.TrieNode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class KEditDistance {
     /**
-     * 2/1/2019
-     * DFS on trie
+     * 2/22/2019
+     * GameDay
+     * https://www.lintcode.com/problem/k-edit-distance/description
      *
      * @param words: a set of stirngs
      * @param target: a target string
@@ -27,42 +25,79 @@ public class KEditDistance {
             trie.add(word);
         }
 
-        int[] dp = new int[target.length() + 1];
-        for (int i = 0; i <= target.length(); i++) {
-            dp[i] = i;
-        }
-
         List<String> list = new ArrayList<>();
-        dfs(trie.root, dp, 0, k, target, "", list);
-
+        dfs(target, "", null, k, list, trie.root);
         return list;
     }
 
-    private void dfs(TrieNode current, int[] last, int length, int k, String target, String source, List<String> list) {
-        int[] dp = new int[last.length];
+    private void dfs(String target, String current, int[] last, int k, List<String> list, TrieNode node) {
+        int[] dp = new int[target.length() + 1];
 
-        if (length == 0) {
-            dp = last;
+        if (node.c == '#') {
+            for (int i = 1; i <= target.length(); i++) {
+                dp[i] = i;
+            }
         } else {
-            dp[0] = length;
-            for (int t = 1; t <= target.length(); t++) {
-                if (target.charAt(t - 1) == current.c) {
-                    dp[t] = Math.min(last[t - 1], Math.min(last[t] + 1, dp[t - 1] + 1));
+            dp[0] = current.length() + 1;
+            for (int i = 1; i <= target.length(); i++) {
+                if (node.c == target.charAt(i - 1)) {
+                    dp[i] = Math.min(last[i - 1], Math.min(last[i] + 1, dp[i - 1] + 1));
                 } else {
-                    dp[t] = Math.min(last[t - 1] + 1, Math.min(last[t] + 1, dp[t - 1] + 1));
+                    dp[i] = Math.min(last[i - 1] + 1, Math.min(last[i] + 1, dp[i - 1] + 1));
                 }
             }
-            source += current.c;
         }
 
-        if (current.isWord && dp[target.length()] <= k) {
-            list.add(source);
+        if (node.c != '#') {
+            current += node.c;
+        }
+
+        if (dp[target.length()] <= k && node.isWord) {
+            list.add(current);
         }
 
         for (int i = 0; i <= 25; i++) {
-            if (current.next[i] != null) {
-                dfs(current.next[i], dp, length + 1, k, target, source, list);
+            if (node.next[i] != null) {
+                dfs(target, current, dp, k, list, node.next[i]);
             }
         }
+    }
+
+    public class TrieNode{
+        char c;
+        TrieNode[] next;
+        boolean isWord;
+
+        public TrieNode(char c) {
+            this.c = c;
+            this.next = new TrieNode[26];
+            this.isWord = false;
+        }
+    }
+
+    public class Trie {
+        public TrieNode root;
+
+        public Trie() {
+            this.root = new TrieNode('#');
+        }
+
+        public void add(String word) {
+            TrieNode current = root;
+            for (char c : word.toCharArray()) {
+                if (current.next[c - 'a'] == null) {
+                    current.next[c - 'a'] = new TrieNode(c);
+                }
+                current = current.next[c - 'a'];
+            }
+            current.isWord = true;
+        }
+    }
+
+    public static void main(String[] args) {
+        String[] input = {"as","ab","cf","da","ee","e","adee","eeda"};
+        String target = "eefab";
+
+        System.out.println(new KEditDistance().kDistance(input, target, 1));
     }
 }

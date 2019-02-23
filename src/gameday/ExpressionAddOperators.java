@@ -5,8 +5,9 @@ import java.util.List;
 
 public class ExpressionAddOperators {
     /**
-     * 2/8/2016
-     * DFS on cutting intervals
+     * 2/22/2019
+     * GameDay
+     * https://www.lintcode.com/problem/expression-add-operators/description
      *
      * @param num: a string contains only digits 0-9
      * @param target: An integer
@@ -17,35 +18,34 @@ public class ExpressionAddOperators {
             return new ArrayList<>();
         }
 
-        List<String> list = new ArrayList<>();
-        dfs(0, 0, 0, "", num, Long.valueOf(target), list);
+        List<String> result = new ArrayList<>();
+        dfs(num, target, 0, 0, 0, result, "");
 
-        return list;
+        return result;
     }
 
-    private void dfs(int start, long current, long lastOperator, String expression, String num, long target, List<String> list) {
+    private void dfs(String num, long target, int start, long sum, long last, List<String> result, String current) {
         if (start == num.length()) {
-            if (current == target) {
-                list.add(expression);
+            if (sum == target) {
+                result.add(current);
             }
             return;
         }
 
-        for (int end = start + 1; end <= num.length(); end++) {
-            if (end > start + 1 && num.charAt(start) == '0') {
+        for (int i = start + 1; i <= num.length(); i++) {
+            if (num.charAt(start) == '0' && i > start + 1) {
                 break;
             }
 
-            long next = Long.valueOf(num.substring(start, end));
+            long next = Long.valueOf(num.substring(start, i));
 
             if (start == 0) {
-                dfs(end, next, next, "" + next, num, target, list);
-                continue;
+                dfs(num, target, i, next, next, result, "" + next);
+            } else {
+                dfs(num, target, i, sum + next, next, result, current + "+" + next);
+                dfs(num, target, i, sum - next, -next, result, current + "-" + next);
+                dfs(num, target, i, sum - last + last * next, last * next, result, current + "*" + next);
             }
-
-            dfs(end, current + next, next, expression + "+" + next, num, target, list);
-            dfs(end, current - next, -next, expression + "-" + next, num, target, list);
-            dfs(end, current - lastOperator + lastOperator * next, lastOperator * next, expression + "*" + next, num, target, list);
         }
     }
 }

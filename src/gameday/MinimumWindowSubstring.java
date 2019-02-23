@@ -5,61 +5,58 @@ import java.util.Map;
 
 public class MinimumWindowSubstring {
     /**
-     * 1/22/2019
-     * Chasing window
+     * 2/22/2019
+     * GameDay
+     * https://www.lintcode.com/problem/minimum-window-substring/description
      *
      * @param source : A string
      * @param target: A string
      * @return: A string denote the minimum window, return "" if there is no such a string
      */
     public String minWindow(String source , String target) {
-        if (source == null || target == null || source.length() == 0 || target.length() == 0) {
+        if (source == null || source.length() == 0) {
             return "";
         }
 
-        Map<Character, Integer> targetCount = new HashMap<>(), sourceCount = new HashMap<>();
-        int gap = target.length();
+        Map<Character, Integer> targetFreq = new HashMap<>(), sourceFreq = new HashMap<>();
 
+        int distance = 0;
         for (Character c : target.toCharArray()) {
-            targetCount.put(c, targetCount.getOrDefault(c, 0) + 1);
-            sourceCount.put(c, 0);
+            targetFreq.put(c, targetFreq.getOrDefault(c, 0) + 1);
+            distance++;
         }
 
-        int left = 0, right = 0;
-        int min = Integer.MAX_VALUE;
-        String str = "";
+        int left = 0, right = 0, min = Integer.MAX_VALUE;
+        String result = "";
 
         while (true) {
-            if (gap == 0) {
-                if (min > right - left) {
-                    str = source.substring(left, right);
+            if (distance == 0) {
+                if (right - left < min) {
+                    result = source.substring(left, right);
                     min = right - left;
                 }
 
-                if (targetCount.containsKey(source.charAt(left))) {
-                    sourceCount.put(source.charAt(left), sourceCount.get(source.charAt(left)) - 1);
-                    if (sourceCount.get(source.charAt(left)) < targetCount.get(source.charAt(left))) {
-                        gap++;
-                    }
-                }
+                char c = source.charAt(left);
 
+                sourceFreq.put(c, sourceFreq.get(c) - 1);
+                if (targetFreq.containsKey(c) && targetFreq.get(c) > sourceFreq.get(c)) {
+                    distance++;
+                }
                 left++;
             } else {
                 if (right == source.length()) {
                     break;
                 }
+                char c = source.charAt(right);
 
-                if (targetCount.containsKey(source.charAt(right))) {
-                    sourceCount.put(source.charAt(right), sourceCount.get(source.charAt(right)) + 1);
-                    if (sourceCount.get(source.charAt(right)) <= targetCount.get(source.charAt(right))) {
-                        gap--;
-                    }
+                sourceFreq.put(c, sourceFreq.getOrDefault(c, 0) + 1);
+                if (targetFreq.containsKey(c) && targetFreq.get(c) >= sourceFreq.get(c)) {
+                    distance--;
                 }
-
                 right++;
             }
         }
 
-        return str;
+        return result;
     }
 }

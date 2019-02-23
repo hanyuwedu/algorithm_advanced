@@ -4,8 +4,9 @@ import java.util.Arrays;
 
 public class TriangleCount {
     /**
-     * 1/9/2018
-     * collide pointers
+     * 2/23/2019
+     * GameDay
+     * https://www.lintcode.com/problem/triangle-count/description
      *
      * @param S: A list of integers
      * @return: An integer
@@ -15,18 +16,17 @@ public class TriangleCount {
             return 0;
         }
 
-        Arrays.sort(S);
         int count = 0;
+        Arrays.sort(S);
 
         for (int c = S.length - 1; c >= 0; c--) {
             int a = 0, b = c - 1;
             while (a < b) {
-                int sum = S[a] + S[b];
-                if (sum > S[c]) {
+                if (S[a] + S[b] <= S[c]) {
+                    a++;
+                } else {
                     count += b - a;
                     b--;
-                } else {
-                    a++;
                 }
             }
         }
