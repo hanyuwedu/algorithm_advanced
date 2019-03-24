@@ -1,4 +1,4 @@
-package data_structure.DirectedGraph;
+package data_structure.graph.directedgraph;
 
 import java.util.HashMap;
 import java.util.Map;
