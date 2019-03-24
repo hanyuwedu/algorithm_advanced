@@ -1,20 +1,21 @@
-package data_structure.DirectedGraph;
+package graph.undirectedgraph;
 
+import graph.directedgraph.WeightedDirectedGraphNode;
 import data_structure.unionfind.UnionFindSet;
 
 import java.util.*;
 
 public class MinimumSpanningTree {
-    public int minimumSpanningTree(List<DirectedGraphNode> nodes) {
+    public int minimumSpanningTree(List<WeightedDirectedGraphNode> nodes) {
         if (nodes == null || nodes.isEmpty()) {
             return -1;
         }
 
         List<Connection> connections = new ArrayList<>();
-        UnionFindSet<DirectedGraphNode> ufs = new UnionFindSet<>();
+        UnionFindSet<WeightedDirectedGraphNode> ufs = new UnionFindSet<>();
 
-        for (DirectedGraphNode node : nodes) {
-            for (DirectedGraphNode neighbor : node.neighbors.keySet()) {
+        for (WeightedDirectedGraphNode node : nodes) {
+            for (WeightedDirectedGraphNode neighbor : node.neighbors.keySet()) {
                 connections.add(new Connection(node, neighbor, node.neighbors.get(neighbor)));
             }
             ufs.add(node);
@@ -39,10 +40,10 @@ public class MinimumSpanningTree {
     }
 
     public class Connection {
-        public DirectedGraphNode from, to;
+        public WeightedDirectedGraphNode from, to;
         public int cost;
 
-        public Connection(DirectedGraphNode from, DirectedGraphNode to, int cost) {
+        public Connection(WeightedDirectedGraphNode from, WeightedDirectedGraphNode to, int cost) {
             this.from = from;
             this.to = to;
             this.cost = cost;
@@ -51,14 +52,14 @@ public class MinimumSpanningTree {
 
 
     public static void main(String[] args) {
-        DirectedGraphNode a = new DirectedGraphNode(0);
-        DirectedGraphNode b = new DirectedGraphNode(1);
-        DirectedGraphNode c = new DirectedGraphNode(2);
-        DirectedGraphNode d = new DirectedGraphNode(3);
-        DirectedGraphNode e = new DirectedGraphNode(4);
-        DirectedGraphNode f = new DirectedGraphNode(5);
-        DirectedGraphNode g = new DirectedGraphNode(6);
-        DirectedGraphNode h = new DirectedGraphNode(7);
+        WeightedDirectedGraphNode a = new WeightedDirectedGraphNode(0);
+        WeightedDirectedGraphNode b = new WeightedDirectedGraphNode(1);
+        WeightedDirectedGraphNode c = new WeightedDirectedGraphNode(2);
+        WeightedDirectedGraphNode d = new WeightedDirectedGraphNode(3);
+        WeightedDirectedGraphNode e = new WeightedDirectedGraphNode(4);
+        WeightedDirectedGraphNode f = new WeightedDirectedGraphNode(5);
+        WeightedDirectedGraphNode g = new WeightedDirectedGraphNode(6);
+        WeightedDirectedGraphNode h = new WeightedDirectedGraphNode(7);
 
 
         a.neighbors.put(b, 4);
@@ -92,7 +93,7 @@ public class MinimumSpanningTree {
         g.neighbors.put(e, 5);
         g.neighbors.put(f, 3);
 
-        List<DirectedGraphNode> nodes = Arrays.asList(a, b, c, d, e, f, g);
+        List<WeightedDirectedGraphNode> nodes = Arrays.asList(a, b, c, d, e, f, g);
         System.out.println(new MinimumSpanningTree().minimumSpanningTree(nodes));
     }
 }
